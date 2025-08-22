@@ -1,4 +1,4 @@
-/* Escopo: tudo dentro do .calc-embed para não afetar sua LP */
+
 .calc-embed .calculadora-widget{
   --cor-primaria: #004894;
   --cor-branca: #FFFFFF;
@@ -13,7 +13,7 @@
   border-radius: var(--raio-borda);
   box-shadow: var(--sombra-card);
   padding: calc(var(--espacamento) * 1.25);
-  max-width: 760px; /* ajuste: 720/640 se quiser menor */
+  max-width: 760px; 
   margin: 0 auto;
 }
 
@@ -26,9 +26,8 @@
   padding-left: .5rem;
 }
 
-/* Form compacto: 3 colunas no desktop, 2 no tablet, 1 no mobile */
 .calc-embed .calculadora-form{ display: grid; gap: 12px; }
-.calc-embed .form-row{ display: contents; } /* grid puro */
+.calc-embed .form-row{ display: contents; } 
 .calc-embed .form-group{
   min-width: 0;
   display: flex; flex-direction: column; gap: 6px;
@@ -53,7 +52,6 @@
   position: static; font-size: .78rem; color: #B91C1C; min-height: 0;
 }
 
-/* Botões */
 .calc-embed .calculadora-botoes{ display:flex; gap:10px; flex-wrap:wrap; margin-top: 8px; }
 .calc-embed .btn{
   height: 36px; padding: 0 14px; border-radius: 10px; border: 0; cursor: pointer;
@@ -83,7 +81,6 @@
 }
 .calc-embed .tabela-resultados tbody tr:nth-child(even){ background:#F8FAFD; }
 
-/* Reduzir um pouco as colunas intermediárias para caber melhor */
 .calc-embed.compacto .tabela-resultados th:nth-child(3),
 .calc-embed.compacto .tabela-resultados td:nth-child(3),
 .calc-embed.compacto .tabela-resultados th:nth-child(5),
@@ -92,14 +89,13 @@
 .calc-embed.compacto .tabela-resultados td:nth-child(6){ display:none; }
 
 :root{
-  --calc-max: 1200px;   /* coloque 1200 para combinar com a 2ª seção; mude p/ 720 se quiser menor */
+  --calc-max: 1200px;   
 }
 
-/* container da 1ª seção (título + form) */
 .calc-wrap{
   max-width: var(--calc-max);
   margin: 0 auto;
-  padding: 0 16px;  /* respiro nas laterais no mobile */
+  padding: 0 16px; 
 }
 
 .calc-section-title{
@@ -109,7 +105,6 @@
   margin: 0 0 12px 0;
 }
 
-/* garante as variáveis tbm no container do resultados */
 .calc-embed{
   --cor-primaria: #004894;
   --cor-branca: #FFFFFF;
@@ -119,7 +114,6 @@
   --sombra-card: 0 8px 24px rgba(2,13,36,.08);
 }
 
-/* aplica o mesmo “card” da primeira seção na 2ª seção (resultados) */
 #calc-resultados .resultados{
   max-width: var(--calc-max);
   margin: 8px auto 0;

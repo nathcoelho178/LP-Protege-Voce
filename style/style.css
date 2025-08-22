@@ -1,9 +1,9 @@
-/* ===== Hero - foto como background ===== */
+
 .hero-header{
   position: relative;
-  background-image: url('../images/mulher-bolsa.jpg'); /* use .webp se puder */
+  background-image: url('../images/mulher-bolsa.jpg'); 
   background-size: cover;
-  background-position: 70% center; /* foco à direita */
+  background-position: 70% center; 
   color: #fff;
   overflow: hidden;
 }
@@ -29,13 +29,11 @@
   }
 }
 
-/* ===== Seções ===== */
 .page-section-dark{ padding:80px 0; background-color:#141d4e; }
 .page-section-light{ padding:80px 0; background-color:#f6f8ff; color:#141d4e; }
 
 #canais h2{ max-width:800px; margin-left:auto; margin-right:auto; }
 
-/* Canais */
 .canal-box{
   background-color:#2a3b8f; color:white;
   padding:20px 10px; border-radius:12px; text-align:center; font-weight:600;
@@ -44,11 +42,9 @@
 .canal-box:hover{ transform:translateY(-5px); box-shadow:0 10px 20px rgba(0,0,0,.2); }
 .footnote{ font-style:italic; font-size:.9rem; color:rgba(255,255,255,.7); }
 
-/* Fade-in genérico */
 .fade-in-element{ opacity:0; transform:translateY(20px); transition:opacity .6s ease-out, transform .6s ease-out; }
 .fade-in-element.is-visible{ opacity:1; transform:translateY(0); }
 
-/* Timeline */
 .timeline-shape{
   width:150px; height:150px; background-color:#2a3b8f; margin:0 auto;
   display:flex; justify-content:center; align-items:center; font-weight:bold; padding:10px;
@@ -64,11 +60,10 @@
 .timeline-container.is-visible .timeline-final-phrase{ transition-delay:1.4s; }
 #como-funciona{ color:white; }
 
-/* Conteúdo padrão */
 .content-box{ background:#fff; border-radius:16px; padding:28px; box-shadow:0 10px 30px rgba(0,0,0,.07); }
 .coverage-title{ letter-spacing:.5px; }
 
-/* Lista em cascata */
+
 .stagger-list{ margin:0; padding-left:1.4rem; counter-reset:item; }
 .stagger-list li{
   background:#fff; border-radius:12px; padding:14px 16px; margin-bottom:12px;
@@ -89,7 +84,6 @@
 
 .conditions-summary{ cursor:pointer; font-weight:600; color:#2a3b8f; }
 
-/* Benefícios */
 .benefit-card{
   background:#bfc3c8; color:#1b1b1b; border-radius:16px; padding:20px 18px;
   box-shadow:0 10px 30px rgba(0,0,0,.12); min-height:150px;
@@ -111,14 +105,12 @@
   .benefit-card h3{ font-size:1.1rem; }
 }
 
-/* Nosso papel (setas) */
 .role-section{ color:#141d4e; }
 
-/* vars para setas */
 :root{
-  --arrow-gutter: 140px; /* espaço à esquerda */
-  --arrow-length: 110px; /* comprimento da linha */
-  --arrow-head: 10px;    /* largura da ponta */
+  --arrow-gutter: 140px; 
+  --arrow-length: 110px; 
+  --arrow-head: 10px; 
 }
 .arrow-steps{
   position:relative; max-width:980px; margin:0 auto;
@@ -170,7 +162,6 @@
   .arrow-step{ font-size:1rem; padding:14px 16px; border-radius:10px; }
 }
 
-/* Contato */
 #contato{ color:#fff; }
 .contact-card{ color:#fff; }
 .contact-name{ font-weight:800; font-size:1.75rem; margin-bottom:.25rem; }
@@ -180,16 +171,15 @@
 @media (min-width:992px){
   .border-start-lg{ border-left:1px solid rgba(255,255,255,.35); padding-left:2rem; margin-top:1.4rem; }
 }
-/* ícone + número */
+
 .contact-link.icon{ display:inline-flex; align-items:center; gap:.5rem; }
 .contact-link.icon .bi{ font-size:1.25rem; line-height:1; }
-/* label "Contatos" */
+
 .eyebrow-label{
   color:rgba(255,255,255,.7); text-transform:uppercase; letter-spacing:.08em;
   font-weight:700; font-size:.9rem; margin:0 0 .5rem 0;
 }
 
-/* Acessibilidade: reduzir animações se o usuário preferir */
 @media (prefers-reduced-motion: reduce){
   *{ scroll-behavior:auto !important; }
   .fade-in-element, .timeline-item, .timeline-final-phrase, .benefit-card,

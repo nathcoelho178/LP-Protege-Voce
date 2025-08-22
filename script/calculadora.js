@@ -1,13 +1,12 @@
 (function(){
-  // ===== API pública =====
   window.initCalculadoraProjecao = function(selector, options = {}) {
     const config = {
       initial:{ pdvs:null, clientes:null, valor:null, pdv:null, est:null, cen1:null, cen2:null, cen3:null, meses:null },
       exampleButton:false,
       exampleValues:{ pdvs:60, clientes:1500, valor:5.9, pdv:25, est:10, cen1:10, cen2:20, cen3:30, meses:60 },
-      resultsTarget:null, // <- mover resultados p/ outro container
-      compact:false,      // <- aplica classe visual
-      hideTitle:false     // <- esconde o h2 do widget
+      resultsTarget:null, 
+      compact:false,      
+      hideTitle:false     
     };
     Object.assign(config, options);
 
@@ -18,14 +17,14 @@
     if(config.compact) widget.classList.add('is-compact');
     host.appendChild(widget);
 
-    // Move resultados se definido
+    
     if(config.resultsTarget){
       const destino = document.querySelector(config.resultsTarget);
       const blocoResultados = widget.querySelector('#resultados');
       if(destino && blocoResultados) destino.appendChild(blocoResultados);
     }
 
-    // Esconde título se pedido
+   
     if(config.hideTitle){
       const tit = widget.querySelector('.calculadora-titulo');
       if(tit) tit.style.display = 'none';
@@ -35,7 +34,6 @@
     checkUrlParams();
   };
 
-  // ===== Render =====
   function renderWidget(config){
     const wrap = document.createElement('div');
     wrap.className = 'calculadora-widget';
@@ -94,7 +92,6 @@
     return wrap;
   }
 
-  // helpers de markup
   function input(id,label,ph){
     return `
       <div class="form-group">
@@ -135,13 +132,12 @@
     `;
   }
 
-  // ===== Eventos / Lógica =====
   function initEvents(scope, config){
     const form = scope.querySelector('#form-calculadora');
     const btnCalcular = scope.querySelector('#btn-calcular');
     const btnLimpar = scope.querySelector('#btn-limpar');
     const btnExemplo = scope.querySelector('#btn-exemplo');
-    const resultados = document.getElementById('resultados'); // pode ter sido movido
+    const resultados = document.getElementById('resultados'); 
 
     const camposCfg = [
       { id:'pdvs',    tipo:'inteiro',    min:0 },
@@ -155,7 +151,7 @@
       { id:'meses',   tipo:'inteiro',    min:12, max:120 }
     ];
 
-    // listeners
+    
     camposCfg.forEach(c=>{
       const input = scope.querySelector('#'+c.id);
       const erro  = scope.querySelector('#erro-'+c.id);
@@ -266,7 +262,6 @@
     if(out) out.textContent = fmtBRL(acum);
   }
 
-  // Pré-preenchimento por URL (opcional)
   function checkUrlParams(){
     const params = new URLSearchParams(location.search);
     const map = ['pdvs','clientes','valor','pdv','est','cen1','cen2','cen3','meses'];
