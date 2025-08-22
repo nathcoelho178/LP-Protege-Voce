@@ -1,7 +1,7 @@
 /* ===== Hero - foto como background ===== */
 .hero-header{
   position: relative;
-  background-image: url('images/mulher-bolsa.jpg'); /* use .webp se puder */
+  background-image: url('../images/mulher-bolsa.jpg'); /* use .webp se puder */
   background-size: cover;
   background-position: 70% center; /* foco à direita */
   color: #fff;
