@@ -1,9 +1,9 @@
 (function(){
   window.initCalculadoraProjecao = function(selector, options = {}) {
     const config = {
-      initial:{ pdvs:null, clientes:null, valor:null, pdv:null, est:null, cen1:null, cen2:null, cen3:null, meses:null },
+      initial:{ pdvs:null, clientes:null, valor:null, pdv:null, est:null, cen1:null, cen2:null, cen3:null },
       exampleButton:false,
-      exampleValues:{ pdvs:60, clientes:1500, valor:5.9, pdv:25, est:10, cen1:10, cen2:20, cen3:30, meses:60 },
+      exampleValues:{ pdvs:60, clientes:1500, valor:5.9, pdv:25, est:10, cen1:10, cen2:20, cen3:30 },
       resultsTarget:null, 
       compact:false,      
       hideTitle:false     
@@ -17,20 +17,17 @@
     if(config.compact) widget.classList.add('is-compact');
     host.appendChild(widget);
 
-    
     if(config.resultsTarget){
       const destino = document.querySelector(config.resultsTarget);
       const blocoResultados = widget.querySelector('#resultados');
       if(destino && blocoResultados) destino.appendChild(blocoResultados);
     }
 
-   
     if(config.hideTitle){
       const tit = widget.querySelector('.calculadora-titulo');
       if(tit) tit.style.display = 'none';
     }
 
-    // Pré-preencher por query string, se existir
     checkUrlParams();
   };
 
@@ -44,11 +41,10 @@
       <form class="calculadora-form" id="form-calculadora">
         <div class="form-row">
           ${input('pdvs','Quantidade de PDVs','ex.: 60')}
-          ${input('clientes','Quantidade de clientes/mês','ex.: 1500')}
-          ${input('valor','Valor do produto (R$)','ex.: 5,90')}
+          ${input('clientes','Quantidade de clientes/mês','ex.: 1.500')}
+          ${input('valor','Valor do produto (R$)','ex.: R$ 5,90')}
           ${input('pdv','% PDV','ex.: 25')}
           ${input('est','% Estipulante','ex.: 10')}
-          ${input('meses','Horizonte (meses)','ex.: 60')}
           ${input('cen1','Cenário Pessimista (%)','ex.: 10')}
           ${input('cen2','Cenário Realista (%)','ex.: 20')}
           ${input('cen3','Cenário Otimista (%)','ex.: 30')}
@@ -87,6 +83,13 @@
         </div>
       </div>
     `;
+
+    wrap.querySelector('#cen1').value = '10';
+    wrap.querySelector('#cen2').value = '20';
+    wrap.querySelector('#cen3').value = '30';
+
+    wrap.querySelector('#clientes')?.setAttribute('inputmode','numeric');
+    wrap.querySelector('#valor')?.setAttribute('inputmode','decimal');
 
     initEvents(wrap, config);
     return wrap;
@@ -137,35 +140,42 @@
     const btnCalcular = scope.querySelector('#btn-calcular');
     const btnLimpar = scope.querySelector('#btn-limpar');
     const btnExemplo = scope.querySelector('#btn-exemplo');
-    const resultados = document.getElementById('resultados'); 
+    const resultados = document.getElementById('resultados'); // pode ter sido movido
 
     const camposCfg = [
       { id:'pdvs',    tipo:'inteiro',    min:0 },
-      { id:'clientes',tipo:'inteiro',    min:0 },
-      { id:'valor',   tipo:'decimal',    min:0 },
+      { id:'clientes',tipo:'inteiro',    min:0, formatThousands:true },
+      { id:'valor',   tipo:'decimal',    min:0, formatCurrency:true },
       { id:'pdv',     tipo:'percentual', min:0, max:100 },
       { id:'est',     tipo:'percentual', min:0, max:100 },
       { id:'cen1',    tipo:'percentual', min:0, max:100 },
       { id:'cen2',    tipo:'percentual', min:0, max:100 },
-      { id:'cen3',    tipo:'percentual', min:0, max:100 },
-      { id:'meses',   tipo:'inteiro',    min:12, max:120 }
+      { id:'cen3',    tipo:'percentual', min:0, max:100 }
+      // horizonte fixo = 60 (não há campo)
     ];
 
-    
     camposCfg.forEach(c=>{
       const input = scope.querySelector('#'+c.id);
       const erro  = scope.querySelector('#erro-'+c.id);
-      input.addEventListener('input', ()=>{ validarCampo(input,erro,c); verificarFormulario(scope, btnCalcular); });
-      input.addEventListener('blur',  ()=>{ validarCampo(input,erro,c); verificarFormulario(scope, btnCalcular); });
+
+      const onChange = ()=>{
+        if (c.formatThousands) formatThousandsInput(input);
+        if (c.formatCurrency)  formatCurrencyBRInput(input);
+        validarCampo(input,erro,c);
+        verificarFormulario(scope, btnCalcular, camposCfg);
+      };
+
+      input.addEventListener('input', onChange);
+      input.addEventListener('blur', onChange);
     });
 
     btnCalcular.addEventListener('click', ()=>{ calcular(scope); resultados.classList.add('mostrar'); });
-    btnLimpar.addEventListener('click', ()=>{ limpar(scope, btnCalcular); resultados.classList.remove('mostrar'); });
+    btnLimpar.addEventListener('click', ()=>{ limpar(scope, btnCalcular, camposCfg); resultados.classList.remove('mostrar'); });
 
     if(btnExemplo){
       btnExemplo.addEventListener('click', ()=>{
         preencherExemplo(scope, config.exampleValues);
-        verificarFormulario(scope, btnCalcular);
+        verificarFormulario(scope, btnCalcular, camposCfg);
         calcular(scope);
         resultados.classList.add('mostrar');
       });
@@ -177,64 +187,100 @@
     });
   }
 
+  function getNumericValue(input, cfg){
+    if (cfg && cfg.formatThousands) {
+      const digits = input.value.replace(/\D/g,'');
+      return digits ? parseInt(digits,10) : NaN;
+    }
+    if (cfg && cfg.formatCurrency) {
+      // moeda pt-BR mascarada
+      return parseBRNumber(input.value);
+    }
+    return parseBRNumber(input.value);
+  }
+
   function validarCampo(input, erro, c){
-    const valor = input.value.trim();
-    if(valor === ''){ erro.textContent=''; return false; }
-    const num = parseBRNumber(valor);
+    const raw = input.value.trim();
+    if(raw === ''){ erro.textContent=''; return false; }
+    const num = getNumericValue(input, c);
     if(Number.isNaN(num)){ erro.textContent='Valor inválido'; return false; }
     if(c.min!==undefined && num < c.min){ erro.textContent='Mínimo: '+c.min; return false; }
     if(c.max!==undefined && num > c.max){ erro.textContent='Máximo: '+c.max; return false; }
     erro.textContent=''; return true;
   }
 
-  function verificarFormulario(scope, btn){
-    const ids = ['pdvs','clientes','valor','pdv','est','cen1','cen2','cen3','meses'];
-    const ok = ids.every(id=>{
-      const el = scope.querySelector('#'+id);
-      const err = scope.querySelector('#erro-'+id);
-      return el.value.trim() !== '' && err.textContent === '';
+  function verificarFormulario(scope, btn, camposCfg){
+    const ok = camposCfg.every(c=>{
+      const el = scope.querySelector('#'+c.id);
+      const err = scope.querySelector('#erro-'+c.id);
+      return el.value.trim() !== '' && (err.textContent === '');
     });
     btn.disabled = !ok; return ok;
   }
 
-  function limpar(scope, btn){
-    ['pdvs','clientes','valor','pdv','est','cen1','cen2','cen3','meses'].forEach(id=>{
-      scope.querySelector('#'+id).value = '';
-      scope.querySelector('#erro-'+id).textContent = '';
+  function limpar(scope, btn, camposCfg){
+    camposCfg.forEach(c=>{
+      const el = scope.querySelector('#'+c.id);
+      el.value = '';
+      scope.querySelector('#erro-'+c.id).textContent = '';
     });
+    // recoloca defaults dos cenários
+    scope.querySelector('#cen1').value = '10';
+    scope.querySelector('#cen2').value = '20';
+    scope.querySelector('#cen3').value = '30';
     btn.disabled = true;
   }
 
   function preencherExemplo(scope, v){
-    scope.querySelector('#pdvs').value = v.pdvs;
-    scope.querySelector('#clientes').value = v.clientes;
-    scope.querySelector('#valor').value = v.valor;
-    scope.querySelector('#pdv').value = v.pdv;
-    scope.querySelector('#est').value = v.est;
-    scope.querySelector('#cen1').value = v.cen1;
-    scope.querySelector('#cen2').value = v.cen2;
-    scope.querySelector('#cen3').value = v.cen3;
-    scope.querySelector('#meses').value = v.meses;
+    scope.querySelector('#pdvs').value = v.pdvs ?? '';
+    const elCli = scope.querySelector('#clientes');
+    elCli.value = v.clientes ?? '';
+    formatThousandsInput(elCli); // exibe 1.500 etc.
+
+    const elVal = scope.querySelector('#valor');
+    elVal.value = fmtBRL(parseBRNumber(v.valor ?? ''));
+    // demais
+    scope.querySelector('#pdv').value = v.pdv ?? '';
+    scope.querySelector('#est').value = v.est ?? '';
+    scope.querySelector('#cen1').value = v.cen1 ?? '10';
+    scope.querySelector('#cen2').value = v.cen2 ?? '20';
+    scope.querySelector('#cen3').value = v.cen3 ?? '30';
+  }
+
+  function formatThousandsInput(el){
+    const digits = el.value.replace(/\D/g,'');
+    el.value = digits ? new Intl.NumberFormat('pt-BR').format(parseInt(digits,10)) : '';
+  }
+
+  function formatCurrencyBRInput(el){
+    const digits = el.value.replace(/\D/g,''); // centavos
+    if(!digits){ el.value = ''; return; }
+    const v = (parseInt(digits,10) / 100) || 0;
+    el.value = new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(v);
   }
 
   function parseBRNumber(str){
-    str = String(str).replace(/[^0-9.,-]/g,'').replace(',','.');
-    return parseFloat(str);
+    let s = String(str).trim();
+    if (s === '') return NaN;
+    s = s.replace(/[^0-9.,-]/g,'');
+    if (s.includes(',')) s = s.replace(/\./g,'').replace(',', '.');
+    return parseFloat(s);
   }
+
   function fmtBRL(num){
     return new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(num);
   }
 
   function calcular(scope){
-    const pdvs     = parseBRNumber(scope.querySelector('#pdvs').value);
-    const clientes = parseBRNumber(scope.querySelector('#clientes').value);
-    const valor    = parseBRNumber(scope.querySelector('#valor').value);
-    const pdvPerc  = parseBRNumber(scope.querySelector('#pdv').value)/100;
-    const estPerc  = parseBRNumber(scope.querySelector('#est').value)/100;
-    const cenPess  = parseBRNumber(scope.querySelector('#cen1').value)/100;
-    const cenReal  = parseBRNumber(scope.querySelector('#cen2').value)/100;
-    const cenOtim  = parseBRNumber(scope.querySelector('#cen3').value)/100;
-    const horizonte= parseBRNumber(scope.querySelector('#meses').value);
+    const pdvs     = getNumericValue(scope.querySelector('#pdvs'),    {id:'pdvs'});
+    const clientes = getNumericValue(scope.querySelector('#clientes'), {formatThousands:true});
+    const valor    = getNumericValue(scope.querySelector('#valor'),    {formatCurrency:true});
+    const pdvPerc  = getNumericValue(scope.querySelector('#pdv'),      {id:'pdv'})/100;
+    const estPerc  = getNumericValue(scope.querySelector('#est'),      {id:'est'})/100;
+    const cenPess  = getNumericValue(scope.querySelector('#cen1'),     {id:'cen1'})/100;
+    const cenReal  = getNumericValue(scope.querySelector('#cen2'),     {id:'cen2'})/100;
+    const cenOtim  = getNumericValue(scope.querySelector('#cen3'),     {id:'cen3'})/100;
+    const horizonte= 60; // FIXO
 
     const baseMensal = pdvs * clientes * valor;
 
@@ -264,22 +310,30 @@
 
   function checkUrlParams(){
     const params = new URLSearchParams(location.search);
-    const map = ['pdvs','clientes','valor','pdv','est','cen1','cen2','cen3','meses'];
+    const keys = ['pdvs','clientes','valor','pdv','est','cen1','cen2','cen3']; // sem 'meses'
     let ok=false;
-    map.forEach(k=>{
-      if(params.has(k)){
-        const inp = document.getElementById(k); if(inp){ inp.value = params.get(k); ok=true; }
-      }
+
+    keys.forEach(k=>{
+      if(!params.has(k)) return;
+      const inp = document.getElementById(k);
+      if(!inp) return;
+
+      const val = params.get(k);
+      if (k === 'clientes') { inp.value = val; formatThousandsInput(inp); }
+      else if (k === 'valor') { inp.value = fmtBRL(parseBRNumber(val)); }
+      else { inp.value = val; }
+      ok = true;
     });
+
     if(params.get('exemplo')==='1'){
       const btn = document.getElementById('btn-exemplo');
       if(btn) btn.classList.remove('hidden');
     }
+
     if(ok){
       const btn = document.getElementById('btn-calcular');
-      // valida rapidamente
       const scope = btn.closest('.calculadora-widget');
-      const campos = ['pdvs','clientes','valor','pdv','est','cen1','cen2','cen3','meses'];
+      const campos = ['pdvs','clientes','valor','pdv','est','cen1','cen2','cen3'];
       const valid = campos.every(id=>{
         const el = scope.querySelector('#'+id);
         const err= scope.querySelector('#erro-'+id);
