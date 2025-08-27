@@ -29,6 +29,7 @@
 .bg-primary{
   --bs-bg-opacity: 1;
   background-color: rgba(var(--bs-primary-rgb), var(--bs-bg-opacity)) !important;
+  background: linear-gradient(180deg, #0B1B43 0%, #0E1E4A 60%, #0F214F 100%);
 }
 
 .navbar.bg-primary{
