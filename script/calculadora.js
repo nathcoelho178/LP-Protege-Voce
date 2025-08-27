@@ -3,7 +3,7 @@
     const config = {
       initial:{ pdvs:null, clientes:null, valor:null, pdv:null, est:null, cen1:null, cen2:null, cen3:null },
       exampleButton:false,
-      exampleValues:{ pdvs:60, clientes:1500, valor:5.9, pdv:25, est:10, cen1:10, cen2:20, cen3:30 },
+      exampleValues:{ pdvs:1, clientes:1500, valor:5.9, pdv:25, est:10, cen1:10, cen2:20, cen3:30 },
       resultsTarget:null, 
       compact:false,      
       hideTitle:false     
@@ -40,14 +40,14 @@
 
       <form class="calculadora-form" id="form-calculadora">
         <div class="form-row">
-          ${input('pdvs','Quantidade de PDVs','ex.: 60')}
+          ${input('pdvs','Quantidade de PDVs','ex.: 1')}
           ${input('clientes','Quantidade de clientes/mês','ex.: 1.500')}
           ${input('valor','Valor do produto (R$)','ex.: R$ 5,90')}
           ${input('pdv','% PDV','ex.: 25')}
           ${input('est','% Estipulante','ex.: 10')}
-          ${input('cen1','Cenário Pessimista (%)','ex.: 10')}
-          ${input('cen2','Cenário Realista (%)','ex.: 20')}
-          ${input('cen3','Cenário Otimista (%)','ex.: 30')}
+          ${input('cen1','Cenário Pessimista (%)','ex.: 10','Conversão de 10% dos clientes/mês')}
+          ${input('cen2','Cenário Realista (%)','ex.: 20','Conversão de 20% dos clientes/mês')}
+          ${input('cen3','Cenário Otimista (%)','ex.: 30','Conversão de 30% dos clientes/mês')}
         </div>
 
         <div class="calculadora-botoes">
@@ -88,6 +88,10 @@
     wrap.querySelector('#cen2').value = '20';
     wrap.querySelector('#cen3').value = '30';
 
+    updateScenarioHint(wrap,'cen1');
+    updateScenarioHint(wrap,'cen2');
+    updateScenarioHint(wrap,'cen3');
+
     wrap.querySelector('#clientes')?.setAttribute('inputmode','numeric');
     wrap.querySelector('#valor')?.setAttribute('inputmode','decimal');
 
@@ -95,15 +99,16 @@
     return wrap;
   }
 
-  function input(id,label,ph){
-    return `
-      <div class="form-group">
-        <label for="${id}" class="form-label">${label}</label>
-        <input type="text" id="${id}" class="form-input" placeholder="${ph}" autocomplete="off">
-        <span class="form-error" id="erro-${id}"></span>
-      </div>
-    `;
-  }
+  function input(id,label,ph, hint=''){
+  return `
+    <div class="form-group">
+      <label for="${id}" class="form-label">${label}</label>
+      <input type="text" id="${id}" class="form-input" placeholder="${ph}" autocomplete="off">
+      ${hint ? `<small class="form-hint" id="hint-${id}">${hint}</small>` : ``}
+      <span class="form-error" id="erro-${id}"></span>
+    </div>
+  `;
+}
   function thead(){
     return `
       <thead>
@@ -135,6 +140,17 @@
     `;
   }
 
+  function updateScenarioHint(scope, id){
+  const v = parseBRNumber(scope.querySelector('#'+id)?.value ?? '');
+  const hintEl = scope.querySelector('#hint-'+id);
+  if(!hintEl) return;
+  if (Number.isFinite(v)) {
+    hintEl.textContent = `Conversão de ${v}% dos clientes/mês`;
+  } else {
+    hintEl.textContent = `Informe a conversão em % dos clientes/mês`;
+  }
+}
+
   function initEvents(scope, config){
     const form = scope.querySelector('#form-calculadora');
     const btnCalcular = scope.querySelector('#btn-calcular');
@@ -163,6 +179,7 @@
         if (c.formatCurrency)  formatCurrencyBRInput(input);
         validarCampo(input,erro,c);
         verificarFormulario(scope, btnCalcular, camposCfg);
+        if (['cen1','cen2','cen3'].includes(c.id)) updateScenarioHint(scope, c.id);
       };
 
       input.addEventListener('input', onChange);
@@ -245,6 +262,7 @@
     scope.querySelector('#cen1').value = v.cen1 ?? '10';
     scope.querySelector('#cen2').value = v.cen2 ?? '20';
     scope.querySelector('#cen3').value = v.cen3 ?? '30';
+    ['cen1','cen2','cen3'].forEach(id => updateScenarioHint(scope, id));
   }
 
   function formatThousandsInput(el){
@@ -329,6 +347,17 @@
       const btn = document.getElementById('btn-exemplo');
       if(btn) btn.classList.remove('hidden');
     }
+
+    ['cen1','cen2','cen3'].forEach(id => {
+    const el = document.getElementById(id);
+    const hint = document.getElementById('hint-'+id);
+    if (el && hint) {
+    const val = parseBRNumber(el.value);
+    hint.textContent = Number.isFinite(val)
+      ? `Conversão de ${val}% dos clientes/mês`
+      : `Informe a conversão em % dos clientes/mês`;
+  }
+    });
 
     if(ok){
       const btn = document.getElementById('btn-calcular');

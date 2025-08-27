@@ -125,3 +125,10 @@
 }
 
 #calc-resultados .resultados { margin-top: 8px; }
+
+.form-hint{
+  display:block;
+  margin-top:6px;
+  font-size:.8rem;
+  color:#6b7280; 
+}
