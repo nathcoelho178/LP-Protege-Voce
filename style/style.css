@@ -286,3 +286,22 @@ body{ scroll-padding-top: 72px; }
   }
 }
 
+html, body{
+  max-width: 100%;
+  overflow-x: clip;
+  overscroll-behavior-x: none;  
+}
+
+section, header, footer, .container, .container-fluid,
+.page-section-dark, .page-section-light {
+  overflow-x: clip;
+}
+
+img, svg, video, canvas, iframe { max-width: 100%; height: auto; display: block; }
+.tabela-scroll{ overflow-x:auto; -webkit-overflow-scrolling: touch; }
+
+.site-footer .brand-logo{
+  height:40px;  
+  width:auto;       
+  max-width:none;    
+}
